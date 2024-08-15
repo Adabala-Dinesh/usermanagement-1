@@ -13,7 +13,4 @@ public class Operation {
 
     private String name;
 
-    // No reference to ModulePermission
-
-    // Getters and Setters
 }

@@ -9,5 +9,5 @@ public class OperationDTO {
     private Long id;
     private String operationName;
 
-    // Getters and Setters
+
 }

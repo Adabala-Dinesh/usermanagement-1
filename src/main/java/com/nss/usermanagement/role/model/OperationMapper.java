@@ -28,7 +28,7 @@ public class OperationMapper {
         Operation operation = new Operation();
         operation.setId(dto.getId());
         operation.setName(dto.getOperationName());
-        // Optionally, you can set other fields here if needed
+
         return operation;
     }
 

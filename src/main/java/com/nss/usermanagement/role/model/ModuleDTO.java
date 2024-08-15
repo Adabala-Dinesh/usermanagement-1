@@ -8,7 +8,7 @@ public class ModuleDTO {
 
     private Long moduleId;
     private String moduleName;
-    private Long parentModuleId;  // Use parentModuleId to avoid circular references
-    private List<ModuleDTO> childModules;  // List of child modules
+    private Long parentModuleId;
+    private List<ModuleDTO> childModules;
 
 }

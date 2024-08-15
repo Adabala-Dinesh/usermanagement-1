@@ -12,5 +12,4 @@ public class RolePermissionDTO {
     private String role;
     private List<ModulePermissionDTO> modulePermissions;
 
-    // Getters and Setters
 }

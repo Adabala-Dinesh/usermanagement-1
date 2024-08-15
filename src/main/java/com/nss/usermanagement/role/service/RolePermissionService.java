@@ -34,7 +34,7 @@ public class RolePermissionService {
     public List<RolePermission> getAllRolePermissions() {
         List<RolePermission> rolePermissions = rolePermissionRepository.findAll();
         if (rolePermissions.isEmpty()) {
-            // Handle case where no records are found
+
             System.out.println("No RolePermissions found");
         }
         return rolePermissions;
@@ -49,7 +49,7 @@ public class RolePermissionService {
         if (rolePermissionRepository.existsById(id)) {
             rolePermissionRepository.deleteById(id);
         } else {
-            // Handle case where the ID does not exist
+
             System.out.println("RolePermission with ID " + id + " does not exist");
         }
     }

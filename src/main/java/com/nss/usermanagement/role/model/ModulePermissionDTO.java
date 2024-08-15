@@ -11,5 +11,5 @@ public class ModulePermissionDTO {
     private Long moduleId;
     private List<OperationDTO> operations;
 
-    // Getters and Setters
+
 }

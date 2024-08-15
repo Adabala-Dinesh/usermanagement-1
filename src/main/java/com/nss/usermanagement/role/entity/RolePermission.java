@@ -23,5 +23,5 @@ public class RolePermission {
     @JoinColumn(name = "role_permission_id")// No mappedBy since we're using JoinColumn
     private List<ModulePermission> modulePermissions;
 
-    // Getters and Setters
+
 }
