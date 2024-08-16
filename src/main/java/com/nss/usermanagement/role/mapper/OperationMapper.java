@@ -1,4 +1,4 @@
-package com.nss.usermanagement.role.model;
+package com.nss.usermanagement.role.mapper;
 
 import com.nss.usermanagement.role.entity.Operation;
 import com.nss.usermanagement.role.model.OperationDTO;

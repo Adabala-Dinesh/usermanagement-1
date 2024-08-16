@@ -1,6 +1,7 @@
-package com.nss.usermanagement.role.model;
+package com.nss.usermanagement.role.mapper;
 
 import com.nss.usermanagement.role.entity.ModulePermission;
+import com.nss.usermanagement.role.model.ModulePermissionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

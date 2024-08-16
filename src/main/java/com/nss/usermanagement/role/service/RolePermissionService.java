@@ -2,6 +2,7 @@ package com.nss.usermanagement.role.service;
 
 import com.nss.usermanagement.role.entity.ModulePermission;
 import com.nss.usermanagement.role.entity.RolePermission;
+import com.nss.usermanagement.role.mapper.RolePermissionMapper;
 import com.nss.usermanagement.role.model.RolePermissionDTO;
 import com.nss.usermanagement.role.repository.ModulePermissionRepo;
 import com.nss.usermanagement.role.repository.RolePermissionRepository;
@@ -20,7 +21,7 @@ public class RolePermissionService {
     @Autowired
     private ModulePermissionRepo modulePermissionRepo;
     @Autowired
-    private com.nss.usermanagement.role.mapper.RolePermissionMapper rolePermissionMapper;
+    private RolePermissionMapper rolePermissionMapper;
 
     public RolePermission createRolePermission(RolePermission rolePermissionReq) {
         List<ModulePermission> modulePermission1 = new ArrayList<>();
