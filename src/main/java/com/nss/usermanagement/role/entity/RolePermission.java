@@ -20,7 +20,7 @@ public class RolePermission {
     private List<Operation> allOperations;*/
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "role_permission_id")// No mappedBy since we're using JoinColumn
+    @JoinColumn(name = "role_permission_id")
     private List<ModulePermission> modulePermissions;
 
 

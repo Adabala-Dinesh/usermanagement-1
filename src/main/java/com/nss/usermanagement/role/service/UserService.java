@@ -13,6 +13,8 @@ public class UserService {
     private UserRepository userRepository;
 
     public User createUser(User user) {
+        if (user.getRolePermission() != null && user.getRolePermission().getId() != null) {
+        }
         return userRepository.save(user);
     }
 

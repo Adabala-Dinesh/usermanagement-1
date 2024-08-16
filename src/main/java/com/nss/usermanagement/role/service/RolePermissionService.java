@@ -1,16 +1,21 @@
 package com.nss.usermanagement.role.service;
 
 import com.nss.usermanagement.role.entity.ModulePermission;
+import com.nss.usermanagement.role.entity.Operation;
 import com.nss.usermanagement.role.entity.RolePermission;
+import com.nss.usermanagement.role.mapper.ModulePermissionMapper;
 import com.nss.usermanagement.role.mapper.RolePermissionMapper;
+import com.nss.usermanagement.role.model.ModulePermissionDTO;
 import com.nss.usermanagement.role.model.RolePermissionDTO;
 import com.nss.usermanagement.role.repository.ModulePermissionRepo;
+import com.nss.usermanagement.role.repository.OperationRepository;
 import com.nss.usermanagement.role.repository.RolePermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RolePermissionService {
@@ -23,12 +28,28 @@ public class RolePermissionService {
     @Autowired
     private RolePermissionMapper rolePermissionMapper;
 
+    @Autowired
+    private ModulePermissionMapper modulePermissionMapper;
+    @Autowired
+    private OperationRepository operationRepository;
+
+
     public RolePermission createRolePermission(RolePermission rolePermissionReq) {
-        List<ModulePermission> modulePermission1 = new ArrayList<>();
+        List<ModulePermission> modulePermissions = new ArrayList<>();
         for (ModulePermission modulePermission : rolePermissionReq.getModulePermissions()) {
-            modulePermission1.add(modulePermissionRepo.save(modulePermission));
+            // Ensure all operations are attached to the session
+            List<Operation> attachedOperations = modulePermission.getOperations().stream()
+                    .map(operation -> operationRepository.findById(operation.getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Operation with ID " + operation.getId() + " not found")))
+                    .collect(Collectors.toList());
+
+            modulePermission.setOperations(attachedOperations);
+
+            // Save modulePermission and add to the list
+            ModulePermission savedModulePermission = modulePermissionRepo.save(modulePermission);
+            modulePermissions.add(savedModulePermission);
         }
-        rolePermissionReq.setModulePermissions(modulePermission1);
+        rolePermissionReq.setModulePermissions(modulePermissions);
         return rolePermissionRepository.save(rolePermissionReq);
     }
 
