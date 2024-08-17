@@ -15,13 +15,10 @@ public class RolePermission {
 
     private String role;
 
-   /* @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "role_permission_id")
-    private List<Operation> allOperations;*/
-
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "role_permission_id")
     private List<ModulePermission> modulePermissions;
+
 
 
 }
