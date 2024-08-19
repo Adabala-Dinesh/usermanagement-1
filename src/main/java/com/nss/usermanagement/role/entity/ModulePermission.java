@@ -20,4 +20,10 @@ public class ModulePermission {
     @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Operation> operations;
 
+    @ElementCollection
+    @CollectionTable(name = "module_permission_operations", joinColumns = @JoinColumn(name = "module_permission_id"))
+    @Column(name = "operation_name")
+    private List<String> operationNames;
+
+
 }

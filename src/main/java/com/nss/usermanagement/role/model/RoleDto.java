@@ -8,9 +8,8 @@ import java.util.List;
 @NoArgsConstructor
 public class RoleDto {
     private Long id;
-    private String displayName;
-    private String name;
-    private int isActive;
+    private String roleName;
+    private int status;
     private String description;
     private List<PermissionDto> permissions;
 

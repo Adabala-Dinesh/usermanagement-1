@@ -10,6 +10,8 @@ import java.util.List;
 public class RolePermissionDTO {
     private Long id;
     private String role;
+    private int status;
+    private String description;
     private List<ModulePermissionDTO> modulePermissions;
 
 }

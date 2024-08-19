@@ -9,6 +9,7 @@ public class ModuleDTO {
     private Long moduleId;
     private String moduleName;
     private Long parentModuleId;
+    private String shortName;
     private List<ModuleDTO> childModules;
 
 }
