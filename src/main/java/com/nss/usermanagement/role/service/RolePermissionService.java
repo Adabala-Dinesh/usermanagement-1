@@ -1,18 +1,24 @@
 package com.nss.usermanagement.role.service;
 
 import com.nss.usermanagement.role.entity.ModulePermission;
-import com.nss.usermanagement.role.entity.Operation;
 import com.nss.usermanagement.role.entity.RolePermission;
-import com.nss.usermanagement.role.mapper.ModulePermissionMapper;
+import com.nss.usermanagement.role.entity.Operation;
+import com.nss.usermanagement.role.exception.ResourceNotFoundException;
 import com.nss.usermanagement.role.mapper.RolePermissionMapper;
-import com.nss.usermanagement.role.model.ModulePermissionDTO;
+import com.nss.usermanagement.role.mapper.ModulePermissionMapper;
 import com.nss.usermanagement.role.model.RolePermissionDTO;
+import com.nss.usermanagement.role.model.RolePermissionRequest;
+import com.nss.usermanagement.role.model.RolePermissionResponse;
+import com.nss.usermanagement.role.repository.RolePermissionRepository;
 import com.nss.usermanagement.role.repository.ModulePermissionRepo;
 import com.nss.usermanagement.role.repository.OperationRepository;
-import com.nss.usermanagement.role.repository.RolePermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,54 +31,57 @@ public class RolePermissionService {
 
     @Autowired
     private ModulePermissionRepo modulePermissionRepo;
+
     @Autowired
     private RolePermissionMapper rolePermissionMapper;
 
     @Autowired
     private ModulePermissionMapper modulePermissionMapper;
+
     @Autowired
     private OperationRepository operationRepository;
 
-
-    public RolePermission createRolePermission(RolePermission rolePermissionReq) {
-        List<ModulePermission> modulePermissions = new ArrayList<>();
-        for (ModulePermission modulePermission : rolePermissionReq.getModulePermissions()) {
-            // Ensure all operations are attached to the session
-            List<Operation> attachedOperations = modulePermission.getOperations().stream()
-                    .map(operation -> operationRepository.findById(operation.getId())
-                            .orElseThrow(() -> new IllegalArgumentException("Operation with ID " + operation.getId() + " not found")))
-                    .collect(Collectors.toList());
-
-            modulePermission.setOperations(attachedOperations);
-
-            // Save modulePermission and add to the list
-            ModulePermission savedModulePermission = modulePermissionRepo.save(modulePermission);
-            modulePermissions.add(savedModulePermission);
-        }
-        rolePermissionReq.setModulePermissions(modulePermissions);
-        return rolePermissionRepository.save(rolePermissionReq);
+    public RolePermissionDTO createRolePermission(RolePermissionRequest rolePermissionRequest) {
+        RolePermission rolePermission = rolePermissionMapper.toEntity(rolePermissionRequest);
+        List<ModulePermission> modulePermissions = rolePermission.getModulePermissions().stream()
+                .map(modulePermission -> {
+                    // Ensure all operations are attached to the session
+                    List<Operation> attachedOperations = modulePermission.getOperations().stream()
+                            .map(operation -> operationRepository.findById(operation.getId())
+                                    .orElseThrow(() -> new IllegalArgumentException("Operation with ID " + operation.getId() + " not found")))
+                            .collect(Collectors.toList());
+                    modulePermission.setOperations(attachedOperations);
+                    return modulePermissionRepo.save(modulePermission);
+                })
+                .collect(Collectors.toList());
+        rolePermission.setModulePermissions(modulePermissions);
+        RolePermission savedRolePermission = rolePermissionRepository.save(rolePermission);
+        return rolePermissionMapper.toDTO(savedRolePermission);
     }
 
-    public List<RolePermission> getAllRolePermissions() {
-        List<RolePermission> rolePermissions = rolePermissionRepository.findAll();
-        if (rolePermissions.isEmpty()) {
-
-            System.out.println("No RolePermissions found");
-        }
-        return rolePermissions;
+    public RolePermissionDTO getRolePermissionById(Long id) {
+        RolePermission rolePermission = rolePermissionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("RolePermission not found with ID " + id));
+        return rolePermissionMapper.toDTO(rolePermission);
     }
 
-    public RolePermissionDTO    getRolePermissionById(Long id) {
-        Optional<RolePermission> rolePermissionOpt = rolePermissionRepository.findById(id);
-        return rolePermissionOpt.map(rolePermissionMapper::toDTO).orElse(null);
+
+    public RolePermissionResponse getAllRolePermissions(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        Page<RolePermission> rolePermissionsPage = rolePermissionRepository.findAll(pageable);
+
+        // Map RolePermission to RolePermissionDTO
+        Page<RolePermissionDTO> rolePermissionDTOPage = rolePermissionsPage.map(rolePermissionMapper::toDTO);
+
+        // Return a RolePermissionResponse with the DTOs
+        return new RolePermissionResponse(rolePermissionDTOPage);
     }
 
     public void deleteRolePermission(Long id) {
         if (rolePermissionRepository.existsById(id)) {
             rolePermissionRepository.deleteById(id);
         } else {
-
-            System.out.println("RolePermission with ID " + id + " does not exist");
+            throw new RuntimeException("RolePermission with ID " + id + " does not exist");
         }
     }
 }

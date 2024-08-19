@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class Operation {
+public class Operation extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

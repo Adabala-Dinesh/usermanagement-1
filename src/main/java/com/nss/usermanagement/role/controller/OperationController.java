@@ -1,6 +1,8 @@
 package com.nss.usermanagement.role.controller;
 
 import com.nss.usermanagement.role.model.OperationDTO;
+import com.nss.usermanagement.role.model.OperationRequest;
+import com.nss.usermanagement.role.model.OperationResponse;
 import com.nss.usermanagement.role.service.OperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +18,8 @@ public class OperationController {
     private OperationService operationService;
 
     @PostMapping
-    public ResponseEntity<OperationDTO> createOperation(@RequestBody OperationDTO operationDTO) {
-        OperationDTO createdOperation = operationService.createOperation(operationDTO);
+    public ResponseEntity<OperationDTO> createOperation(@RequestBody OperationRequest operationRequest) {
+        OperationDTO createdOperation = operationService.createOperation(operationRequest.getOperationDTO());
         return ResponseEntity.ok(createdOperation);
     }
 
@@ -31,14 +33,23 @@ public class OperationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OperationDTO>> getAllOperations() {
-        List<OperationDTO> operations = operationService.getAllOperations();
-        return ResponseEntity.ok(operations);
+    public ResponseEntity<OperationResponse> getAllOperations(@RequestParam int page, @RequestParam int size) {
+        OperationResponse response = operationService.getAllOperations(page, size);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOperation(@PathVariable Long id) {
         operationService.deleteOperation(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<OperationDTO> updateOperation(@PathVariable Long id, @RequestBody OperationRequest operationRequest) {
+        OperationDTO updatedOperation = operationService.updateOperation(id, operationRequest.getOperationDTO());
+        if (updatedOperation == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updatedOperation);
     }
 }

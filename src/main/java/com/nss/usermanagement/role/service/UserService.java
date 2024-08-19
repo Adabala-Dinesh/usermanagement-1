@@ -1,32 +1,51 @@
 package com.nss.usermanagement.role.service;
 
 import com.nss.usermanagement.role.entity.User;
+import com.nss.usermanagement.role.model.UserDTO;
+import com.nss.usermanagement.role.model.UserRequest;
+import com.nss.usermanagement.role.model.UserResponse;
 import com.nss.usermanagement.role.repository.UserRepository;
+import com.nss.usermanagement.role.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public User createUser(User user) {
-        if (user.getRolePermission() != null && user.getRolePermission().getId() != null) {
-        }
-        return userRepository.save(user);
+    @Autowired
+    private UserMapper userMapper;
+
+    public UserDTO createUser(UserRequest userRequest) {
+        User user = userMapper.toEntity(userRequest);
+        User savedUser = userRepository.save(user);
+        return userMapper.toDTO(savedUser);
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public UserDTO getUserById(Long id) {
+        Optional<User> userOpt = userRepository.findById(id);
+        return userOpt.map(userMapper::toDTO).orElse(null);
     }
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public UserResponse getAllUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("userId").ascending());
+        Page<User> userPage = userRepository.findAll(pageable);
+        Page<UserDTO> userDTOPage = userPage.map(userMapper::toDTO);
+        return new UserResponse(userDTOPage);
     }
 
     public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("User with ID " + id + " does not exist");
+        }
     }
 }

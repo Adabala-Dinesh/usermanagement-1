@@ -8,8 +8,8 @@ import java.util.List;
 @NoArgsConstructor
 public class ModulePermissionDTO {
     private Long id;
-    private Long moduleId;
+    private ModuleDTO module;
     private List<OperationDTO> operations;
-
+    private String operationsAsString;
 
 }
