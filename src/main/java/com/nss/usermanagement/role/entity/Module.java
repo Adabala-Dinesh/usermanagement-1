@@ -10,7 +10,7 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "module")
-public class Module extends AuditEntity{
+public class Module extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +28,13 @@ public class Module extends AuditEntity{
     @Column(name = "parent_module_id", nullable = true)
     private Long parentModuleId;
 
-    @OneToMany(mappedBy = "parentModuleId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_module_id", insertable = false, updatable = false)
+    private Module parentModule;
+
+    @OneToMany(mappedBy = "parentModule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> childModules;
+
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ModulePermission> modulePermissions;
 }

@@ -7,23 +7,23 @@ import java.util.List;
 
 @Entity
 @Data
-public class ModulePermission {
+@Table(name = "module_permission")
+public class ModulePermission extends AuditEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "module_permission_id")
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "module_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "module_id", nullable = false)
     private Module module;
 
-    @OneToMany(mappedBy = "id", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "module_permission_operations",
+            joinColumns = @JoinColumn(name = "module_permission_id"),
+            inverseJoinColumns = @JoinColumn(name = "operation_id")
+    )
     private List<Operation> operations;
-
-    @ElementCollection
-    @CollectionTable(name = "module_permission_operations", joinColumns = @JoinColumn(name = "module_permission_id"))
-    @Column(name = "operation_name")
-    private List<String> operationNames;
-
-
 }
