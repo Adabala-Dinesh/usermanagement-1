@@ -1,14 +1,12 @@
 package com.nss.usermanagement.role.controller;
 
 import com.nss.usermanagement.role.model.OperationDTO;
-import com.nss.usermanagement.role.model.OperationRequest;
-import com.nss.usermanagement.role.model.OperationResponse;
+import com.nss.usermanagement.role.request.OperationRequest;
+import com.nss.usermanagement.role.Responce.OperationResponse;
 import com.nss.usermanagement.role.service.OperationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/operations")

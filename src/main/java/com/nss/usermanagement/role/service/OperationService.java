@@ -3,7 +3,7 @@ package com.nss.usermanagement.role.service;
 import com.nss.usermanagement.role.entity.Operation;
 import com.nss.usermanagement.role.mapper.OperationMapper;
 import com.nss.usermanagement.role.model.OperationDTO;
-import com.nss.usermanagement.role.model.OperationResponse;
+import com.nss.usermanagement.role.Responce.OperationResponse;
 import com.nss.usermanagement.role.repository.OperationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

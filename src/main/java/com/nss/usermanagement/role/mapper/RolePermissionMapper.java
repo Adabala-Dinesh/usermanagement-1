@@ -4,7 +4,7 @@ import com.nss.usermanagement.role.entity.ModulePermission;
 import com.nss.usermanagement.role.entity.RolePermission;
 import com.nss.usermanagement.role.model.ModulePermissionDTO;
 import com.nss.usermanagement.role.model.RolePermissionDTO;
-import com.nss.usermanagement.role.model.RolePermissionRequest;
+import com.nss.usermanagement.role.request.RolePermissionRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -64,6 +64,39 @@ public class RolePermissionMapper {
 
         return rolePermission;
     }
+
+    public RolePermission updateEntity(RolePermission existingRolePermission, RolePermissionRequest rolePermissionRequest) {
+        if (rolePermissionRequest == null) {
+            return existingRolePermission;
+        }
+
+        RolePermission updatedRolePermission = toEntity(rolePermissionRequest);
+
+        existingRolePermission.setRole(updatedRolePermission.getRole());
+        existingRolePermission.setStatus(updatedRolePermission.getStatus());
+        existingRolePermission.setDescription(updatedRolePermission.getDescription());
+
+        // Handle module permissions
+        List<ModulePermission> existingPermissions = existingRolePermission.getModulePermissions();
+        List<ModulePermission> updatedPermissions = updatedRolePermission.getModulePermissions();
+
+        // Remove orphaned permissions
+        existingPermissions.removeIf(existingPermission ->
+                updatedPermissions.stream().noneMatch(updatedPermission ->
+                        updatedPermission.getId() != null && updatedPermission.getId().equals(existingPermission.getId()))
+        );
+
+        // Add new permissions
+        for (ModulePermission updatedPermission : updatedPermissions) {
+            if (updatedPermission.getId() == null || !existingPermissions.stream()
+                    .anyMatch(existingPermission -> updatedPermission.getId() != null && updatedPermission.getId().equals(existingPermission.getId()))) {
+                existingPermissions.add(updatedPermission);
+            }
+        }
+
+        return prepareForUpdate(existingRolePermission);
+    }
+
 
     public RolePermission prepareForCreation(RolePermission rolePermission) {
         String currentUser = getCurrentUser();

@@ -1,8 +1,8 @@
 package com.nss.usermanagement.role.controller;
 
-import com.nss.usermanagement.role.model.UserRequest;
+import com.nss.usermanagement.role.request.UserRequest;
 import com.nss.usermanagement.role.model.UserDTO;
-import com.nss.usermanagement.role.model.UserResponse;
+import com.nss.usermanagement.role.Responce.UserResponse;
 import com.nss.usermanagement.role.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -28,8 +28,15 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @PutMapping("/{id}")
+    public UserDTO updateUser(@PathVariable Long id, @RequestBody UserRequest userRequest) {
+        return userService.updateUser(id, userRequest);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
     }
+
+
 }

@@ -1,5 +1,6 @@
-package com.nss.usermanagement.role.model;
+package com.nss.usermanagement.role.request;
 
+import com.nss.usermanagement.role.model.AuditLog;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

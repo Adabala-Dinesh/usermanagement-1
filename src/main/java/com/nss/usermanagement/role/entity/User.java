@@ -61,7 +61,7 @@ public class User extends AuditEntity {
     @Column(name = "description", length = 255)
     private String description;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "role_permission_id", referencedColumnName = "id")
     private RolePermission rolePermission;
 }

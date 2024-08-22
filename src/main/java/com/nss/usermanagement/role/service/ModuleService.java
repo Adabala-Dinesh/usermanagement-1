@@ -5,8 +5,8 @@ import com.nss.usermanagement.role.exception.GeneralRunTimeException;
 import com.nss.usermanagement.role.exception.ResourceNotFoundException;
 import com.nss.usermanagement.role.mapper.ModuleMapper;
 import com.nss.usermanagement.role.model.ModuleDTO;
-import com.nss.usermanagement.role.model.ModuleRequest;
-import com.nss.usermanagement.role.model.ModuleResponse;
+import com.nss.usermanagement.role.request.ModuleRequest;
+import com.nss.usermanagement.role.Responce.ModuleResponse;
 import com.nss.usermanagement.role.repository.ModuleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ModuleService {
@@ -31,10 +30,8 @@ public class ModuleService {
         Module module = ModuleMapper.toEntity(moduleRequest);
         module = moduleRepository.save(module);
 
-        // Convert the saved Module entity to ModuleDTO
         ModuleDTO moduleDTO = ModuleMapper.toDTO(module);
 
-        // Create a Page containing the single ModuleDTO
         List<ModuleDTO> moduleDTOList = List.of(moduleDTO);
         Page<ModuleDTO> moduleDTOPage = new PageImpl<>(moduleDTOList, PageRequest.of(0, 1), 1);
 
@@ -47,7 +44,7 @@ public class ModuleService {
             throw new ResourceNotFoundException("Module details are not found");
         }
 
-        // Convert Page<Module> to Page<ModuleDTO>
+
         Page<ModuleDTO> moduleDTOPage = modulePage.map(ModuleMapper::toDTO);
 
         return new ModuleResponse(moduleDTOPage);
@@ -57,10 +54,8 @@ public class ModuleService {
         Module module = moduleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Module details are not found"));
 
-        // Convert the single Module entity to ModuleDTO
         ModuleDTO moduleDTO = ModuleMapper.toDTO(module);
 
-        // Create a Page containing the single ModuleDTO
         List<ModuleDTO> moduleDTOList = List.of(moduleDTO);
         Page<ModuleDTO> moduleDTOPage = new PageImpl<>(moduleDTOList, PageRequest.of(0, 1), 1);
 
@@ -79,15 +74,14 @@ public class ModuleService {
         module.setShortName(moduleRequest.getModuleDTO().getShortName());
         module.setParentModuleId(moduleRequest.getModuleDTO().getParentModuleId());
 
-        // Prepare module for update
         module = ModuleMapper.prepareForUpdate(module);
 
         module = moduleRepository.save(module);
 
-        // Convert the updated Module entity to ModuleDTO
+
         ModuleDTO moduleDTO = ModuleMapper.toDTO(module);
 
-        // Create a Page containing the single ModuleDTO
+
         List<ModuleDTO> moduleDTOList = List.of(moduleDTO);
         Page<ModuleDTO> moduleDTOPage = new PageImpl<>(moduleDTOList, PageRequest.of(0, 1), 1);
 

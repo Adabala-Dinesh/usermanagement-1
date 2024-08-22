@@ -2,7 +2,7 @@ package com.nss.usermanagement.role.mapper;
 
 import com.nss.usermanagement.role.entity.Module;
 import com.nss.usermanagement.role.model.ModuleDTO;
-import com.nss.usermanagement.role.model.ModuleRequest;
+import com.nss.usermanagement.role.request.ModuleRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 

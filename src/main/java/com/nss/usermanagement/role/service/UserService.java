@@ -2,8 +2,8 @@ package com.nss.usermanagement.role.service;
 
 import com.nss.usermanagement.role.entity.User;
 import com.nss.usermanagement.role.model.UserDTO;
-import com.nss.usermanagement.role.model.UserRequest;
-import com.nss.usermanagement.role.model.UserResponse;
+import com.nss.usermanagement.role.request.UserRequest;
+import com.nss.usermanagement.role.Responce.UserResponse;
 import com.nss.usermanagement.role.repository.UserRepository;
 import com.nss.usermanagement.role.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +39,19 @@ public class UserService {
         Page<User> userPage = userRepository.findAll(pageable);
         Page<UserDTO> userDTOPage = userPage.map(userMapper::toDTO);
         return new UserResponse(userDTOPage);
+    }
+
+    public UserDTO updateUser(Long id, UserRequest userRequest) {
+        Optional<User> existingUserOpt = userRepository.findById(id);
+
+        if (!existingUserOpt.isPresent()) {
+            throw new RuntimeException("User not found with ID " + id);
+        }
+
+        User existingUser = existingUserOpt.get();
+        User updatedUser = userMapper.updateUserEntity(existingUser, userRequest);
+        updatedUser = userRepository.save(updatedUser);
+        return userMapper.toDTO(updatedUser);
     }
 
     public void deleteUser(Long id) {

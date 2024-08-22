@@ -1,5 +1,6 @@
-package com.nss.usermanagement.role.model;
+package com.nss.usermanagement.role.Responce;
 
+import com.nss.usermanagement.role.model.RolePermissionDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;

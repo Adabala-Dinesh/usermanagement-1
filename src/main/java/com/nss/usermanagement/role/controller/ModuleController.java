@@ -1,7 +1,7 @@
 package com.nss.usermanagement.role.controller;
 
-import com.nss.usermanagement.role.model.ModuleRequest;
-import com.nss.usermanagement.role.model.ModuleResponse;
+import com.nss.usermanagement.role.request.ModuleRequest;
+import com.nss.usermanagement.role.Responce.ModuleResponse;
 import com.nss.usermanagement.role.service.ModuleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

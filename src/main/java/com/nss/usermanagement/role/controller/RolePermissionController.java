@@ -1,15 +1,13 @@
 package com.nss.usermanagement.role.controller;
 
 import com.nss.usermanagement.role.model.RolePermissionDTO;
-import com.nss.usermanagement.role.model.RolePermissionRequest;
-import com.nss.usermanagement.role.model.RolePermissionResponse;
+import com.nss.usermanagement.role.request.RolePermissionRequest;
+import com.nss.usermanagement.role.Responce.RolePermissionResponse;
 import com.nss.usermanagement.role.service.RolePermissionService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/role-permissions")
@@ -36,6 +34,20 @@ public class RolePermissionController {
             @RequestParam(value = "size", defaultValue = "10") int size) {
         RolePermissionResponse response = rolePermissionService.getAllRolePermissions(page, size);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RolePermissionDTO> updateRolePermission(
+            @PathVariable("id") Long id,
+            @RequestBody RolePermissionRequest rolePermissionRequest) {
+
+        RolePermissionDTO updatedRolePermissionDTO = rolePermissionService.updateRolePermission(id, rolePermissionRequest);
+
+        if (updatedRolePermissionDTO != null) {
+            return new ResponseEntity<>(updatedRolePermissionDTO, HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @DeleteMapping("/{id}")

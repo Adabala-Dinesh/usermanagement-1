@@ -7,8 +7,8 @@ import com.nss.usermanagement.role.exception.ResourceNotFoundException;
 import com.nss.usermanagement.role.mapper.RolePermissionMapper;
 import com.nss.usermanagement.role.mapper.ModulePermissionMapper;
 import com.nss.usermanagement.role.model.RolePermissionDTO;
-import com.nss.usermanagement.role.model.RolePermissionRequest;
-import com.nss.usermanagement.role.model.RolePermissionResponse;
+import com.nss.usermanagement.role.request.RolePermissionRequest;
+import com.nss.usermanagement.role.Responce.RolePermissionResponse;
 import com.nss.usermanagement.role.repository.RolePermissionRepository;
 import com.nss.usermanagement.role.repository.ModulePermissionRepo;
 import com.nss.usermanagement.role.repository.OperationRepository;
@@ -65,7 +65,6 @@ public class RolePermissionService {
         return rolePermissionMapper.toDTO(rolePermission);
     }
 
-
     public RolePermissionResponse getAllRolePermissions(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
         Page<RolePermission> rolePermissionsPage = rolePermissionRepository.findAll(pageable);
@@ -75,6 +74,20 @@ public class RolePermissionService {
 
         // Return a RolePermissionResponse with the DTOs
         return new RolePermissionResponse(rolePermissionDTOPage);
+    }
+
+    public RolePermissionDTO updateRolePermission(Long id, RolePermissionRequest rolePermissionRequest) {
+        Optional<RolePermission> optionalExistingRolePermission = rolePermissionRepository.findById(id);
+
+        if (optionalExistingRolePermission.isEmpty()) {
+            throw new RuntimeException("RolePermission not found with id: " + id);
+        }
+
+        RolePermission existingRolePermission = optionalExistingRolePermission.get();
+        RolePermission updatedRolePermission = rolePermissionMapper.updateEntity(existingRolePermission, rolePermissionRequest);
+
+        RolePermission savedRolePermission = rolePermissionRepository.save(updatedRolePermission);
+        return rolePermissionMapper.toDTO(savedRolePermission);
     }
 
     public void deleteRolePermission(Long id) {

@@ -3,7 +3,7 @@ package com.nss.usermanagement.role.mapper;
 import com.nss.usermanagement.role.entity.User;
 import com.nss.usermanagement.role.model.RolePermissionDTO;
 import com.nss.usermanagement.role.model.UserDTO;
-import com.nss.usermanagement.role.model.UserRequest;
+import com.nss.usermanagement.role.request.UserRequest;
 import com.nss.usermanagement.role.entity.RolePermission;
 import com.nss.usermanagement.role.repository.RolePermissionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +72,28 @@ public class UserMapper {
         user = prepareForCreation(user);
 
         return user;
+    }
+
+    public User updateUserEntity(User existingUser, UserRequest userRequest) {
+        existingUser.setFirstName(userRequest.getFirstName());
+        existingUser.setLastName(userRequest.getLastName());
+        existingUser.setUsername(userRequest.getUserName());
+        existingUser.setPassword(userRequest.getPassword());
+        existingUser.setEmail(userRequest.getEmail());
+        existingUser.setPhoneNumber(userRequest.getPhoneNumber());
+        existingUser.setCompanyName(userRequest.getCompanyName());
+        existingUser.setStatus(userRequest.getStatus());
+        existingUser.setDescription(userRequest.getDescription());
+
+        if (userRequest.getRolePermissionId() != null) {
+            RolePermission rolePermission = rolePermissionRepository.findById(userRequest.getRolePermissionId())
+                    .orElseThrow(() -> new RuntimeException("RolePermission not found with id " + userRequest.getRolePermissionId()));
+            existingUser.setRolePermission(rolePermission);
+        }
+
+        existingUser = prepareForUpdate(existingUser);
+
+        return existingUser;
     }
 
     public User prepareForCreation(User user) {
