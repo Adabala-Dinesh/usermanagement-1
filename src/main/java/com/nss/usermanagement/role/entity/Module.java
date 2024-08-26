@@ -34,7 +34,8 @@ public class Module extends AuditEntity {
 
     @OneToMany(mappedBy = "parentModule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> childModules;
-
+/*
     @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ModulePermission> modulePermissions;
+    */
 }

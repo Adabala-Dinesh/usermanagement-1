@@ -72,7 +72,6 @@ public class ModulePermissionMapper {
         return dto;
     }
 
-
     public ModulePermission toEntity(ModulePermissionDTO dto) {
         if (dto == null) {
             return null;

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ModuleService {
@@ -40,15 +41,27 @@ public class ModuleService {
     public ModuleResponse getAllModules(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Module> modulePage = moduleRepository.findAll(pageable);
+
         if (modulePage.isEmpty()) {
             throw new ResourceNotFoundException("Module details are not found");
         }
 
 
-        Page<ModuleDTO> moduleDTOPage = modulePage.map(ModuleMapper::toDTO);
+        List<Module> parentModules = modulePage.getContent().stream()
+                .filter(module -> module.getParentModuleId() == null)
+                .collect(Collectors.toList());
+
+
+        List<ModuleDTO> moduleDTOList = parentModules.stream()
+                .map(ModuleMapper::toDTO)
+                .collect(Collectors.toList());
+
+
+        Page<ModuleDTO> moduleDTOPage = new PageImpl<>(moduleDTOList, pageable, parentModules.size());
 
         return new ModuleResponse(moduleDTOPage);
     }
+
 
     public ModuleResponse getModuleById(Long id) {
         Module module = moduleRepository.findById(id)

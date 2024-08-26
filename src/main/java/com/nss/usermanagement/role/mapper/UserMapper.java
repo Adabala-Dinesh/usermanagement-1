@@ -1,26 +1,30 @@
 package com.nss.usermanagement.role.mapper;
 
+import com.nss.usermanagement.role.entity.RolePermission;
 import com.nss.usermanagement.role.entity.User;
 import com.nss.usermanagement.role.model.RolePermissionDTO;
 import com.nss.usermanagement.role.model.UserDTO;
-import com.nss.usermanagement.role.request.UserRequest;
-import com.nss.usermanagement.role.entity.RolePermission;
 import com.nss.usermanagement.role.repository.RolePermissionRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nss.usermanagement.role.request.UserRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class UserMapper {
 
-    @Autowired
-    private RolePermissionMapper rolePermissionMapper;
+    private final RolePermissionRepository rolePermissionRepository;
+    private final ModulePermissionMapper modulePermissionMapper;
 
-    @Autowired
-    private RolePermissionRepository rolePermissionRepository;
+    public UserMapper(RolePermissionRepository rolePermissionRepository, ModulePermissionMapper modulePermissionMapper) {
+        this.rolePermissionRepository = rolePermissionRepository;
+        this.modulePermissionMapper = modulePermissionMapper;
+    }
 
     public UserDTO toDTO(User user) {
         if (user == null) {
@@ -28,19 +32,34 @@ public class UserMapper {
         }
 
         UserDTO dto = new UserDTO();
+        dto.setUserId(user.getUserId());
         dto.setFirstName(user.getFirstName());
         dto.setLastName(user.getLastName());
         dto.setUserName(user.getUsername());
-        dto.setPassword(user.getPassword());
         dto.setEmail(user.getEmail());
         dto.setPhoneNumber(user.getPhoneNumber());
         dto.setCompanyName(user.getCompanyName());
         dto.setStatus(user.getStatus());
         dto.setDescription(user.getDescription());
 
-        if (user.getRolePermission() != null) {
-            RolePermissionDTO rolePermissionDTO = rolePermissionMapper.toDTO(user.getRolePermission());
-            dto.setRolePermissionDTO(rolePermissionDTO);
+        // Deserialize RolePermission IDs and fetch RolePermission details
+        if (user.getRolePermissionIds() != null && !user.getRolePermissionIds().isEmpty()) {
+            List<Long> roleIds = Stream.of(user.getRolePermissionIds().split(","))
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+
+            dto.setRolePermissions(roleIds);
+
+            List<RolePermission> rolePermissions = rolePermissionRepository.findAllById(roleIds);
+            dto.setRoleDetails(rolePermissions.stream()
+                    .map(rp -> new RolePermissionDTO(
+                            rp.getId(),
+                            rp.getRole(),
+                            rp.getStatus(),
+                            rp.getDescription(),
+                            modulePermissionMapper.toDTOList(rp.getModulePermissions())
+                    ))
+                    .collect(Collectors.toList()));
         }
 
         return dto;
@@ -62,11 +81,12 @@ public class UserMapper {
         user.setStatus(userRequest.getStatus());
         user.setDescription(userRequest.getDescription());
 
-        if (userRequest.getRolePermissionId() != null) {
-            // Fetch the RolePermission entity using the provided ID
-            RolePermission rolePermission = rolePermissionRepository.findById(userRequest.getRolePermissionId())
-                    .orElseThrow(() -> new RuntimeException("RolePermission not found with id " + userRequest.getRolePermissionId()));
-            user.setRolePermission(rolePermission);
+        // Serialize RolePermission IDs to a single column
+        if (userRequest.getRolePermissions() != null && !userRequest.getRolePermissions().isEmpty()) {
+            String rolePermissionIds = userRequest.getRolePermissions().stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+            user.setRolePermissionIds(rolePermissionIds);
         }
 
         user = prepareForCreation(user);
@@ -74,7 +94,7 @@ public class UserMapper {
         return user;
     }
 
-    public User updateUserEntity(User existingUser, UserRequest userRequest) {
+    public void updateUserEntity(User existingUser, UserRequest userRequest) {
         existingUser.setFirstName(userRequest.getFirstName());
         existingUser.setLastName(userRequest.getLastName());
         existingUser.setUsername(userRequest.getUserName());
@@ -85,18 +105,18 @@ public class UserMapper {
         existingUser.setStatus(userRequest.getStatus());
         existingUser.setDescription(userRequest.getDescription());
 
-        if (userRequest.getRolePermissionId() != null) {
-            RolePermission rolePermission = rolePermissionRepository.findById(userRequest.getRolePermissionId())
-                    .orElseThrow(() -> new RuntimeException("RolePermission not found with id " + userRequest.getRolePermissionId()));
-            existingUser.setRolePermission(rolePermission);
+        // Update RolePermission IDs in the serialized column
+        if (userRequest.getRolePermissions() != null && !userRequest.getRolePermissions().isEmpty()) {
+            String rolePermissionIds = userRequest.getRolePermissions().stream()
+                    .map(String::valueOf)
+                    .collect(Collectors.joining(","));
+            existingUser.setRolePermissionIds(rolePermissionIds);
         }
 
         existingUser = prepareForUpdate(existingUser);
-
-        return existingUser;
     }
 
-    public User prepareForCreation(User user) {
+    private User prepareForCreation(User user) {
         String currentUser = getCurrentUser();
         user.setCreatedOn(LocalDateTime.now());
         user.setUpdatedOn(LocalDateTime.now());
@@ -105,7 +125,7 @@ public class UserMapper {
         return user;
     }
 
-    public User prepareForUpdate(User user) {
+    private User prepareForUpdate(User user) {
         String currentUser = getCurrentUser();
         user.setUpdatedOn(LocalDateTime.now());
         user.setUpdatedBy(currentUser);

@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Data
 @Table(name = "\"user\"")
@@ -61,7 +63,9 @@ public class User extends AuditEntity {
     @Column(name = "description", length = 255)
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "role_permission_id", referencedColumnName = "id")
-    private RolePermission rolePermission;
+    @Column(name = "role_permission_ids", columnDefinition = "TEXT")
+    private String rolePermissionIds; // Serialized list of RolePermission IDs
+
+    @Transient
+    private List<Long> rolePermissions; // For in-memory processing (optional)
 }

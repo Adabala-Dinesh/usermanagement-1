@@ -1,19 +1,20 @@
 package com.nss.usermanagement.role.model;
 
-import com.nss.usermanagement.role.entity.RolePermission;
 import lombok.Data;
+import java.util.List;
 
 @Data
 public class UserDTO {
+    private Long userId;
     private String firstName;
     private String lastName;
     private String userName;
-    private String password;
     private String email;
     private String phoneNumber;
-    private RolePermissionDTO rolePermissionDTO;
     private String companyName;
     private int status;
     private String description;
 
+    private List<Long> rolePermissions; // List of RolePermission IDs
+    private List<RolePermissionDTO> roleDetails; // Detailed RolePermission information
 }
