@@ -1,9 +1,12 @@
 package com.nss.usermanagement.role.service;
 
+import com.nss.usermanagement.role.Responce.UserResponse;
 import com.nss.usermanagement.role.entity.User;
+import com.nss.usermanagement.role.exception.GeneralRunTimeException;
+import com.nss.usermanagement.role.exception.ResourceNotFoundException;
 import com.nss.usermanagement.role.model.UserDTO;
 import com.nss.usermanagement.role.request.UserRequest;
-import com.nss.usermanagement.role.Responce.UserResponse;
+
 import com.nss.usermanagement.role.repository.UserRepository;
 import com.nss.usermanagement.role.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,41 +27,54 @@ public class UserService {
     private UserMapper userMapper;
 
     public UserDTO createUser(UserRequest userRequest) {
-        User user = userMapper.toEntity(userRequest);
-        User savedUser = userRepository.save(user);
-        return userMapper.toDTO(savedUser);
+        try {
+            User user = userMapper.toEntity(userRequest);
+            User savedUser = userRepository.save(user);
+            return userMapper.toDTO(savedUser);
+        } catch (Exception ex) {
+            throw new GeneralRunTimeException("Failed to create user", ex);
+        }
     }
 
     public UserDTO getUserById(Long id) {
-        Optional<User> userOpt = userRepository.findById(id);
-        return userOpt.map(userMapper::toDTO).orElse(null);
+        return userRepository.findById(id)
+                .map(userMapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID " + id));
     }
 
     public UserResponse getAllUsers(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("userId").ascending());
-        Page<User> userPage = userRepository.findAll(pageable);
-        Page<UserDTO> userDTOPage = userPage.map(userMapper::toDTO);
-        return new UserResponse(userDTOPage);
+        try {
+            Pageable pageable = PageRequest.of(page, size, Sort.by("userId").ascending());
+            Page<User> userPage = userRepository.findAll(pageable);
+            Page<UserDTO> userDTOPage = userPage.map(userMapper::toDTO);
+            return new UserResponse(userDTOPage);
+        } catch (Exception ex) {
+            throw new GeneralRunTimeException("Failed to retrieve users", ex);
+        }
     }
 
     public UserDTO updateUser(Long id, UserRequest userRequest) {
-        Optional<User> existingUserOpt = userRepository.findById(id);
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID " + id));
 
-        if (!existingUserOpt.isPresent()) {
-            throw new RuntimeException("User not found with ID " + id);
+        try {
+            User updatedUser = userMapper.updateUserEntity(existingUser, userRequest);
+            updatedUser = userRepository.save(updatedUser);
+            return userMapper.toDTO(updatedUser);
+        } catch (Exception ex) {
+            throw new GeneralRunTimeException("Failed to update user with ID " + id, ex);
         }
-
-        User existingUser = existingUserOpt.get();
-        User updatedUser = userMapper.updateUserEntity(existingUser, userRequest);
-        updatedUser = userRepository.save(updatedUser);
-        return userMapper.toDTO(updatedUser);
     }
 
     public void deleteUser(Long id) {
         if (userRepository.existsById(id)) {
-            userRepository.deleteById(id);
+            try {
+                userRepository.deleteById(id);
+            } catch (Exception ex) {
+                throw new GeneralRunTimeException("Failed to delete user with ID " + id, ex);
+            }
         } else {
-            throw new RuntimeException("User with ID " + id + " does not exist");
+            throw new ResourceNotFoundException("User with ID " + id + " does not exist");
         }
     }
 }
