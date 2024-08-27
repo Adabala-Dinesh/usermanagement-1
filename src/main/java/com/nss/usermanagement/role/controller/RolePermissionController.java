@@ -51,8 +51,15 @@ public class RolePermissionController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRolePermission(@PathVariable Long id) {
-        rolePermissionService.deleteRolePermission(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<String> deleteRolePermission(@PathVariable Long id) {
+        try {
+            rolePermissionService.deleteRolePermission(id);
+            return ResponseEntity.ok("RolePermission deleted successfully.");
+        } catch (Exception e) {
+            // Optional: Handle specific exceptions, e.g., if the role permission is not found
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to delete RolePermission with ID " + id);
+        }
     }
+
 }

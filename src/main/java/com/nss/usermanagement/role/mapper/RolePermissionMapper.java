@@ -13,12 +13,15 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class RolePermissionMapper {
 
     @Autowired
     private ModulePermissionMapper modulePermissionMapper;
+
+
 
     public RolePermissionDTO toDTO(RolePermission rolePermission) {
         if (rolePermission == null) {
@@ -33,12 +36,15 @@ public class RolePermissionMapper {
 
         if (rolePermission.getModulePermissions() != null) {
             List<ModulePermissionDTO> modulePermissionsDTO = rolePermission.getModulePermissions().stream()
-                    .map(modulePermissionMapper::toDTO)
+                    .map(modulePermissionMapper::toDTO)  // Assuming modulePermissionMapper::toDTO converts ModulePermission to ModulePermissionDTO
                     .collect(Collectors.toList());
             dto.setModulePermissions(modulePermissionsDTO);
         }
 
         return dto;
+
+
+
     }
 
     public RolePermission toEntity(RolePermissionRequest rolePermissionRequest) {

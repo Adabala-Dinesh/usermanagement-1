@@ -5,6 +5,8 @@ import com.nss.usermanagement.role.model.UserDTO;
 import com.nss.usermanagement.role.Responce.UserResponse;
 import com.nss.usermanagement.role.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -34,9 +36,17 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        try {
+            userService.deleteUser(id);
+            return ResponseEntity.ok("User deleted successfully.");
+        } catch (Exception e) {
+            // Optional: Handle specific exceptions, e.g., if the user is not found
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to delete User with ID " + id);
+        }
     }
+
 
 
 }

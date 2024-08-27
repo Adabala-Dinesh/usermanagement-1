@@ -5,6 +5,7 @@ import com.nss.usermanagement.role.request.OperationRequest;
 import com.nss.usermanagement.role.Responce.OperationResponse;
 import com.nss.usermanagement.role.service.OperationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,10 +38,17 @@ public class OperationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteOperation(@PathVariable Long id) {
-        operationService.deleteOperation(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<String> deleteOperation(@PathVariable Long id) {
+        try {
+            operationService.deleteOperation(id);
+            return ResponseEntity.ok("Operation deleted successfully.");
+        } catch (Exception e) {
+            // Optional: Handle specific exceptions, e.g., if the operation is not found
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to delete operation with ID " + id);
+        }
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<OperationDTO> updateOperation(@PathVariable Long id, @RequestBody OperationRequest operationRequest) {

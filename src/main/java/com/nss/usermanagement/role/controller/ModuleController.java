@@ -43,8 +43,13 @@ public class ModuleController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteModule(@PathVariable Long id) {
-        moduleService.deleteModule(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    public ResponseEntity<?> deleteModule(@PathVariable Long id) {
+        try {
+            moduleService.deleteModule(id);
+            return ResponseEntity.ok().body("Module deleted successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete module.");
+        }
     }
+
 }
