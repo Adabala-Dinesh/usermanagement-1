@@ -12,41 +12,55 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
     @Autowired
     private UserService userService;
 
     @PostMapping
-    public UserDTO createUser(@RequestBody UserRequest userRequest) {
-        return userService.createUser(userRequest);
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserRequest userRequest) {
+        UserDTO createdUser = userService.createUser(userRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
     @GetMapping
-    public UserResponse getAllUsers(@RequestParam int page, @RequestParam int size) {
-        return userService.getAllUsers(page, size);
+    public ResponseEntity<UserResponse> getAllUsers(@RequestParam int page, @RequestParam int size) {
+        UserResponse userResponse = userService.getAllUsers(page, size);
+        return ResponseEntity.ok(userResponse);
     }
 
     @GetMapping("/{id}")
-    public UserDTO getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        try {
+            UserDTO userDTO = userService.getUserById(id);
+            return ResponseEntity.ok(userDTO);
+        } catch (RuntimeException e) {
+            // Inactive user or user not found
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(null);
+        }
     }
 
     @PutMapping("/{id}")
-    public UserDTO updateUser(@PathVariable Long id, @RequestBody UserRequest userRequest) {
-        return userService.updateUser(id, userRequest);
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @RequestBody UserRequest userRequest) {
+        try {
+            UserDTO updatedUser = userService.updateUser(id, userRequest);
+            return ResponseEntity.ok(updatedUser);
+        } catch (RuntimeException e) {
+            // User not found or other issue
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(null);
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         try {
             userService.deleteUser(id);
-            return ResponseEntity.ok("User deleted successfully.");
-        } catch (Exception e) {
-            // Optional: Handle specific exceptions, e.g., if the user is not found
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Failed to delete User with ID " + id);
+            return ResponseEntity.ok("User status updated to inactive successfully.");
+        } catch (RuntimeException e) {
+            // User not found or other issue
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Failed to update status for User with ID " + id);
         }
     }
-
-
-
 }

@@ -8,11 +8,12 @@ import com.nss.usermanagement.role.repository.UserRepository;
 import com.nss.usermanagement.role.request.UserRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,40 +34,54 @@ public class UserService {
     }
 
     // Update an existing user
+    @Transactional
     public UserDTO updateUser(Long userId, UserRequest userRequest) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-
-        if (optionalUser.isPresent()) {
-            User existingUser = optionalUser.get();
-
-            // Update fields using the mapper
-            userMapper.updateUserEntity(existingUser, userRequest);
-
-            User updatedUser = userRepository.save(existingUser);
-            return userMapper.toDTO(updatedUser);
-        } else {
-            // Handle user not found scenario
-            throw new RuntimeException("User not found with id: " + userId);
+        // Validate the userRequest if necessary
+        if (userRequest == null) {
+            throw new IllegalArgumentException("UserRequest cannot be null");
         }
+
+        // Fetch the existing user
+        User existingUser = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // Update fields using the mapper
+        userMapper.updateUserEntity(existingUser, userRequest);
+
+        // If the status is specified, update it
+        if (userRequest.getStatus() != null) {
+            existingUser.setStatus(userRequest.getStatus());
+        }
+
+        // Save the updated user entity
+        User updatedUser = userRepository.save(existingUser);
+
+        // Return the updated user as DTO
+        return userMapper.toDTO(updatedUser);
     }
 
     // Retrieve a user by ID
     public UserDTO getUserById(Long userId) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        if (optionalUser.isPresent()) {
-            return userMapper.toDTO(optionalUser.get());
-        } else {
-            throw new RuntimeException("User not found with id: " + userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // Check if user is active
+        if (user.getStatus() == 0) { // Assuming 0 means inactive
+            throw new RuntimeException("User is inactive and cannot be accessed.");
         }
+
+        return userMapper.toDTO(user);
     }
 
-    // Delete a user by ID
+    // Mark a user as inactive
+    @Transactional
     public void deleteUser(Long userId) {
-        if (userRepository.existsById(userId)) {
-            userRepository.deleteById(userId);
-        } else {
-            throw new RuntimeException("User not found with id: " + userId);
-        }
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // Set the user's status to inactive (0)
+        user.setStatus(0);
+        userRepository.save(user);
     }
 
     // Retrieve all users with pagination
@@ -74,8 +89,16 @@ public class UserService {
         Pageable pageable = PageRequest.of(page, size);
         Page<User> userPage = userRepository.findAll(pageable);
 
-        Page<UserDTO> userDTOPage = userPage.map(userMapper::toDTO);
+        // Optionally filter out inactive users
+        Page<UserDTO> userDTOPage = userPage.getContent().stream()
+                //.filter(user -> user.getStatus() == 1) // Assuming 1 means active
+                .map(userMapper::toDTO)
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toList(),
+                        list -> new PageImpl<>(list, pageable, userPage.getTotalElements())
+                ));
 
         return new UserResponse(userDTOPage);
     }
 }
+
